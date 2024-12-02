@@ -13,33 +13,39 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Install SSH tools
+    - name: Install SSH and sshpass
       run: |
         sudo apt-get update
-        sudo apt-get install -y sshpass
+        sudo apt-get install -y sshpass git
 
     - name: Deploy to Remote Server
       env:
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+        SERVER_HOST: ${{ secrets.SERVER_HOST }}
+        SERVER_USER: ${{ secrets.SERVER_USER }}
+        REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
       run: |
-        sshpass -p "$SERVER_SSH_KEY" ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
-          # Clone or update the repository
+        # SSH into the server using password authentication and deploy
+        sshpass -p "$SERVER_SSH_KEY" ssh -T -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST << 'EOF'
+          # Clone the repository (use token for authentication with GitHub)
           if [ ! -d "GraphRAG" ]; then
-            git clone https://github.com/fatemenajafi135/GraphRAG.git
+            git clone https://$REPO_TOKEN@github.com/fatemenajafi135/GraphRAG.git
           fi
           cd GraphRAG
           git pull
 
-          # Ensure environment variables are available
+          # Ensure environment variables are set
           export OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
 
-          # Deploy with Docker Compose
+          # Build and deploy the Docker container using docker-compose
           docker-compose down
           docker-compose up --build -d
         EOF
 
     - name: Verify Deployment
       env:
-        SERVER_PASSWORD: ${{ secrets.SERVER_SSH_KEY }}
-      run: sshpass -p "$SERVER_PASSWORD" ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "docker ps"
+        SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+      run: |
+        # Check running containers on the server
+        sshpass -p "$SERVER_SSH_KEY" ssh -T -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST "docker ps"
