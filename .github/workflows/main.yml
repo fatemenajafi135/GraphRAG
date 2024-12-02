@@ -28,6 +28,7 @@ jobs:
       run: |
         sshpass -p "$SERVER_SSH_KEY" ssh -T -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST << 'EOF'
           # Clone or pull the repository (use token for authentication)
+          echo "start pulling"
           if [ ! -d "GraphRAG" ]; then
             git clone https://$REPO_TOKEN@github.com/fatemenajafi135/GraphRAG.git
           else
