@@ -13,21 +13,20 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Set up SSH
+    - name: Install SSH tools
       run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+        sudo apt-get update
+        sudo apt-get install -y sshpass
 
     - name: Deploy to Remote Server
       env:
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
       run: |
-        ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+        sshpass -p "$SERVER_PASSWORD" ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
           # Clone or update the repository
           if [ ! -d "GraphRAG" ]; then
-            git clone https://github.com/your-repo/GraphRAG.git
+            git clone https://github.com/fatemenajafi135/GraphRAG.git
           fi
           cd GraphRAG
           git pull
@@ -41,4 +40,6 @@ jobs:
         EOF
 
     - name: Verify Deployment
-      run: ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "docker ps"
+      env:
+        SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
+      run: sshpass -p "$SERVER_PASSWORD" ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "docker ps"
