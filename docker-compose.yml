@@ -7,6 +7,7 @@ services:
     environment:
       - REDIS_HOST=graph_db
       - REDIS_PORT=6379
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
     depends_on:
       - graph_db
 

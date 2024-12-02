@@ -1,4 +1,3 @@
-# from openai import ChatCompletion
 import os
 import json
 from pathlib import Path
@@ -6,17 +5,16 @@ from graphrag_sdk import Ontology
 from graphrag_sdk.models.openai import OpenAiGenerativeModel
 from schema import OntologyConfig
 
-from dotenv import load_dotenv
-load_dotenv()
+
+openai_api_key = os.getenv("OPENAI_API_KEY")
 
 
 class OntologyService:
 
-    def __init__(self): 
+    def __init__(self):
         self.ontology = None
 
     def create(self, sources, config: OntologyConfig):
-        
         model = OpenAiGenerativeModel(model_name=config.model_name)
         self.ontology = Ontology.from_sources(
             sources=sources,
@@ -38,6 +36,6 @@ class OntologyService:
 
     def load(self, path):
         with open(path, "r", encoding="utf-8") as file:
-            representation = json.load(file)  
+            representation = json.load(file)
         self.ontology = Ontology.from_json(representation)
         return self.ontology

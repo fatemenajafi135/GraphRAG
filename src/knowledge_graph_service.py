@@ -1,11 +1,12 @@
+import os
 from falkordb import FalkorDB
 from graphrag_sdk import KnowledgeGraph
 from graphrag_sdk.model_config import KnowledgeGraphModelConfig
 from graphrag_sdk.models.openai import OpenAiGenerativeModel
 from src.schema import KnowledgeGraphConfig
 
-from dotenv import load_dotenv
-load_dotenv()
+
+openai_api_key = os.getenv("OPENAI_API_KEY")
 
 
 class KnowledgeGraphService:
@@ -30,7 +31,7 @@ class KnowledgeGraphService:
                 # qa_prompt=self.config.qa_prompt
             )
             self.kg.process_sources(sources)
-        return f"{self.config.name}"
+        return self.kb
 
     def create_manually(self, sources):
         pass
