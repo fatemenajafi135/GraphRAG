@@ -18,6 +18,7 @@ class KnowledgeGraphService:
 
     def create(self, sources):
         if self.kb is None:
+            print('creating KG')
             model = OpenAiGenerativeModel(model_name=self.config.model_name)
             self.kg = KnowledgeGraph(
                 name=self.config.name,

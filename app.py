@@ -1,11 +1,15 @@
 import redis
-from fastapi import FastAPI
+from pathlib import Path
+from typing import List
+from fastapi import FastAPI, File, UploadFile
 from src import services
 from src.schema import OntologyConfig, KnowledgeGraphConfig, KGSources, ChatRequest
 
 
 app = FastAPI()
 redis_client = redis.StrictRedis(host="graph_db", port=6379, decode_responses=True)
+sources_directory = Path("/sources")
+
 
 @app.post('/chat')
 def chat(chat_request: ChatRequest):
@@ -16,10 +20,30 @@ def chat(chat_request: ChatRequest):
     return {'response': response}
 
 
+@app.post('/upload_files')
+async def upload_files(files: List[UploadFile] = File(...)):
+    sources_directory.mkdir(parents=True, exist_ok=True)
+
+    uploaded_file_paths = []
+
+    for file in files:
+        file_path = sources_directory / file.filename
+        with open(file_path, "wb") as buffer:
+            buffer.write(await file.read())
+        uploaded_file_paths.append(str(file_path))
+    print(uploaded_file_paths)
+    return uploaded_file_paths
+
 @app.post('/create_ontology')
-def create_ontology(sources: KGSources, config: OntologyConfig):
-    response = services.generate_ontology(sources, config)
-    return {'response': response}
+def create_ontology(
+        sources: KGSources,
+        config: OntologyConfig,
+):
+    try:
+        response = services.generate_ontology(sources, config)
+        return {'response': response}
+    except Exception as e:
+        print('ERROR MESSAGE:', e)
 
 
 @app.post('/create_knowledgebase')
@@ -28,7 +52,7 @@ def create_knowledgebase(sources: KGSources, config: KnowledgeGraphConfig):
     return {'response': response}
 
 
-@app.post('/extend_knowledgebase')
+@app.put('/extend_knowledgebase')
 def extend_knowledgebase(sources: KGSources, config: KnowledgeGraphConfig):
     response = services.extend_knowledge_graph(sources, config)
     return {'response': response}
