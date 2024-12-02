@@ -10,6 +10,9 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     depends_on:
       - graph_db
+    volumes:
+      - ./sources:/sources
+      - ./knowledgebase/ontologies:/knowledgebase/ontologies
 
   graph_db:
     image: falkordb/falkordb:edge

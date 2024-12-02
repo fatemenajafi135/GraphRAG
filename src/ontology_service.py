@@ -15,6 +15,7 @@ class OntologyService:
         self.ontology = None
 
     def create(self, sources, config: OntologyConfig):
+        print('creating ontology')
         model = OpenAiGenerativeModel(model_name=config.model_name)
         self.ontology = Ontology.from_sources(
             sources=sources,
