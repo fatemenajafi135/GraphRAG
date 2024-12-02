@@ -4,6 +4,9 @@ from graphrag_sdk.model_config import KnowledgeGraphModelConfig
 from graphrag_sdk.models.openai import OpenAiGenerativeModel
 from src.schema import KnowledgeGraphConfig
 
+from dotenv import load_dotenv
+load_dotenv()
+
 
 class KnowledgeGraphService:
 
@@ -19,6 +22,7 @@ class KnowledgeGraphService:
                 name=self.config.name,
                 model_config=KnowledgeGraphModelConfig.with_model(model),
                 ontology=self.ontology,
+                host='graph_db',
                 # cypher_system_instruction=self.config.cypher_system_instruction,
                 # qa_system_instruction=self.config.qa_system_instruction,
                 # cypher_gen_prompt=self.config.cypher_gen_prompt,
@@ -26,10 +30,14 @@ class KnowledgeGraphService:
                 # qa_prompt=self.config.qa_prompt
             )
             self.kg.process_sources(sources)
-        return f"KG named {self.config.name} created!"
+        return f"{self.config.name}"
 
     def create_manually(self, sources):
         pass
+
+    # def __str__(self) -> str:
+    #     # print nodes and ...
+    #     pass
 
     def extend(self, sources):
         if self.kb is None:
@@ -37,7 +45,7 @@ class KnowledgeGraphService:
         self.kg.process_sources(sources)
 
     def select_kg(self):
-        db = FalkorDB()
+        db = FalkorDB(host='graph_db')
         if self.kb is None:
             self.kb = db.select_graph(self.config.name)
-        return "Graph-BD loaded!"
+        return 'GRAPH DB LOADED'

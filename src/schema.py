@@ -14,7 +14,7 @@ class KGSources(BaseModel):
 class OntologyConfig(BaseModel):
 
     name: str = "movies-6"
-    path: str = "/home/fateme/graph_rag/knowledgebase/ontologies/"
+    path: str = "./knowledgebase/ontologies/"
     model_name: str = "gpt-4o-mini"
     ontology_prompt: str = """
         Extract only the most relevant information about all the movies, actors, and directors over the text.

@@ -1,4 +1,5 @@
 # from openai import ChatCompletion
+import os
 import json
 from pathlib import Path
 from graphrag_sdk import Ontology
@@ -6,7 +7,7 @@ from graphrag_sdk.models.openai import OpenAiGenerativeModel
 from schema import OntologyConfig
 
 from dotenv import load_dotenv
-load_dotenv("./config/.env")
+load_dotenv()
 
 
 class OntologyService:
@@ -29,6 +30,7 @@ class OntologyService:
     #     pass
 
     def _save_ontology(self, name, base_path):
+        os.makedirs(base_path, exist_ok=True)
         path = Path(base_path) / f"ontology-{name}.json"
         with open(path, "w", encoding="utf-8") as file:
             file.write(json.dumps(self.ontology.to_json(), indent=2))
