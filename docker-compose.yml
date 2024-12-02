@@ -13,7 +13,7 @@ services:
 
   graph_db:
     image: falkordb/falkordb:edge
-    container_name: falkordb
+    container_name: falkor_db
     ports:
       - "6379:6379"
     volumes:
