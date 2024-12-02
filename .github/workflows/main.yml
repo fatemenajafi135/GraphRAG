@@ -1,0 +1,44 @@
+name: Deploy GraphRAG
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+
+    - name: Deploy to Remote Server
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      run: |
+        ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+          # Clone or update the repository
+          if [ ! -d "GraphRAG" ]; then
+            git clone https://github.com/your-repo/GraphRAG.git
+          fi
+          cd GraphRAG
+          git pull
+
+          # Ensure environment variables are available
+          export OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+
+          # Deploy with Docker Compose
+          docker-compose down
+          docker-compose up --build -d
+        EOF
+
+    - name: Verify Deployment
+      run: ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "docker ps"
