@@ -1,0 +1,20 @@
+services:
+  app:
+    build:
+      context: ./
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_HOST=graph_db
+      - REDIS_PORT=6379
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    depends_on:
+      - graph_db
+
+  graph_db:
+    image: falkordb/falkordb:edge
+    container_name: falkordb
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./knowledgebase/graphdb:/data
