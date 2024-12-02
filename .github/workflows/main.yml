@@ -26,17 +26,17 @@ jobs:
         SERVER_USER: ${{ secrets.SERVER_USER }}
         REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
       run: |
-        # SSH into the server using password authentication and deploy
         sshpass -p "$SERVER_SSH_KEY" ssh -T -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST << 'EOF'
-          # Clone the repository (use token for authentication with GitHub)
+          # Clone or pull the repository (use token for authentication)
           if [ ! -d "GraphRAG" ]; then
             git clone https://$REPO_TOKEN@github.com/fatemenajafi135/GraphRAG.git
+          else
+            cd GraphRAG
+            git pull
           fi
-          cd GraphRAG
-          git pull
 
           # Ensure environment variables are set
-          export OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+          export OPENAI_API_KEY=$OPENAI_API_KEY
 
           # Build and deploy the Docker container using docker-compose
           docker-compose down
@@ -46,6 +46,8 @@ jobs:
     - name: Verify Deployment
       env:
         SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+        SERVER_HOST: ${{ secrets.SERVER_HOST }}
+        SERVER_USER: ${{ secrets.SERVER_USER }}
       run: |
         # Check running containers on the server
         sshpass -p "$SERVER_SSH_KEY" ssh -T -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST "docker ps"
