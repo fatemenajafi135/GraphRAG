@@ -21,9 +21,9 @@ jobs:
     - name: Deploy to Remote Server
       env:
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
+        SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
       run: |
-        sshpass -p "$SERVER_PASSWORD" ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+        sshpass -p "$SERVER_SSH_KEY" ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
           # Clone or update the repository
           if [ ! -d "GraphRAG" ]; then
             git clone https://github.com/fatemenajafi135/GraphRAG.git
@@ -41,5 +41,5 @@ jobs:
 
     - name: Verify Deployment
       env:
-        SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
+        SERVER_PASSWORD: ${{ secrets.SERVER_SSH_KEY }}
       run: sshpass -p "$SERVER_PASSWORD" ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "docker ps"
